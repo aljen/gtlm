@@ -185,41 +185,39 @@ main(int argc, char *argv[])
     }
 
     device = libgtlm_init(forceReset);
-    if (device)
-        libgtlm_read_config(device);
+    if (!device) goto error_no_device;
+
+    libgtlm_read_config(device);
 
     if (showStatus) {
         print_version(argv[0]);
-        if (device) {
-            char *name;
-            char version[6];
-            memset(&version, 0x00, 6);
-            libgtlm_get_version(device, (char*)&version);
-            name = libgtlm_get_device_name(device);
-            printf("Device     : %s\n", name);
-            printf("Version    : %s\n", version);
-            printf("Back LEDs  : %s\n", libgtlm_is_led_enabled(device, LEDS_BACK)
-                ? "ON" : "OFF");
-            printf("Side LEDs  : %s\n", libgtlm_is_led_enabled(device, LEDS_SIDE)
-                ? "ON" : "OFF");
-            printf("Front LEDs : %s\n", libgtlm_is_led_enabled(device, LEDS_FRONT)
-                ? "ON" : "OFF");
-            printf("Mode       : ");
-            if (device->led_mode == MODE_BLINK)
-                printf("BLINK\n");
-            else if (device->led_mode == MODE_AUDIO)
-                printf("AUDIO\n");
-            else if (device->led_mode == MODE_BREATH)
-                printf("BREATH\n");
-            else if (device->led_mode == MODE_DEMO)
-                printf("DEMO\n");
-            else if (device->led_mode == MODE_ALWAYS)
-                printf("ALWAYS\n");
-            free(name);
-            libgtlm_write_config(device);
-            libgtlm_free(device);
-        } else
-            printf("Led controller not found!\n");
+        char *name;
+        char version[6];
+        memset(&version, 0x00, 6);
+        libgtlm_get_version(device, (char*)&version);
+        name = libgtlm_get_device_name(device);
+        printf("Device     : %s\n", name);
+        printf("Version    : %s\n", version);
+        printf("Back LEDs  : %s\n", libgtlm_is_led_enabled(device, LEDS_BACK)
+            ? "ON" : "OFF");
+        printf("Side LEDs  : %s\n", libgtlm_is_led_enabled(device, LEDS_SIDE)
+            ? "ON" : "OFF");
+        printf("Front LEDs : %s\n", libgtlm_is_led_enabled(device, LEDS_FRONT)
+            ? "ON" : "OFF");
+        printf("Mode       : ");
+        if (device->led_mode == MODE_BLINK)
+            printf("BLINK\n");
+        else if (device->led_mode == MODE_AUDIO)
+            printf("AUDIO\n");
+        else if (device->led_mode == MODE_BREATH)
+            printf("BREATH\n");
+        else if (device->led_mode == MODE_DEMO)
+            printf("DEMO\n");
+        else if (device->led_mode == MODE_ALWAYS)
+            printf("ALWAYS\n");
+        free(name);
+        libgtlm_write_config(device);
+        libgtlm_free(device);
         return 0;
     }
 
@@ -247,9 +245,14 @@ main(int argc, char *argv[])
 
     libgtlm_sync(device);
 
-    if (device)
-        libgtlm_write_config(device);
+    libgtlm_write_config(device);
 
     libgtlm_free(device);
+    goto normal_exit;
+
+error_no_device:
+    printf("Led controller not found!\n");
+
+normal_exit:
     return 0;
 }
